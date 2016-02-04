@@ -46,10 +46,6 @@ public class HostedWebApp extends CordovaPlugin {
     private CordovaPlugin whiteListPlugin;
 
     private LinearLayout rootLayout;
-    private WebView offlineWebView;
-    private boolean offlineOverlayEnabled;
-
-    private boolean isConnectionError = false;
 
     @Override
     public void pluginInitialize() {
@@ -68,33 +64,6 @@ public class HostedWebApp extends CordovaPlugin {
         }
 
         this.loadingManifest = false;
-
-        // Initialize offline overlay
-        this.activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (me.rootLayout == null) {
-                    me.rootLayout = me.createOfflineRootLayout();
-                    me.activity.addContentView(me.rootLayout, me.rootLayout.getLayoutParams());
-                }
-
-                if (me.offlineWebView == null) {
-                    me.offlineWebView = me.createOfflineWebView();
-                    me.rootLayout.addView(me.offlineWebView);
-                }
-
-                if (me.assetExists(HostedWebApp.OFFLINE_PAGE)) {
-                    me.offlineWebView.loadUrl("file:///android_asset/www/" + HostedWebApp.OFFLINE_PAGE);
-                } else {
-                    me.offlineWebView.loadData(
-                            String.format(HostedWebApp.OFFLINE_PAGE_TEMPLATE, "It looks like you are offline. Please reconnect to use this application."),
-                            "text/html",
-                            null);
-                }
-
-                me.offlineOverlayEnabled = true;
-            }
-        });
     }
 
     @Override
@@ -147,18 +116,18 @@ public class HostedWebApp extends CordovaPlugin {
         }
 
         if (action.equals("enableOfflinePage")) {
-            this.offlineOverlayEnabled = true;
+            Log.w(LOG_TAG, "Offline Page DISABLED in this version!");
             return true;
         }
 
         if (action.equals("disableOfflinePage")) {
-            this.offlineOverlayEnabled = false;
+            Log.w(LOG_TAG, "Offline Page DISABLED in this version!");
             return true;
         }
 
-		if (action.equals("injectPluginScript")) {
-			final List<String> scripts = new ArrayList<String>();
-			scripts.add(args.getString(0));
+        if (action.equals("injectPluginScript")) {
+            final List<String> scripts = new ArrayList<String>();
+            scripts.add(args.getString(0));
 
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
@@ -173,39 +142,15 @@ public class HostedWebApp extends CordovaPlugin {
             });
 
             return true;
-		}
+        }
 
         return false;
     }
 
     @Override
     public Object onMessage(String id, Object data) {
-        if (id.equals("networkconnection") && data != null) {
-            this.handleNetworkConnectionChange(data.toString());
-        } else if (id.equals("onPageStarted")) {
-            this.isConnectionError = false;
-        } else if (id.equals("onReceivedError")) {
-            if (data instanceof JSONObject) {
-                JSONObject errorData = (JSONObject) data;
-                try {
-                    int errorCode = errorData.getInt("errorCode");
-                    if (404 == errorCode
-                            || WebViewClient.ERROR_HOST_LOOKUP == errorCode
-                            || WebViewClient.ERROR_CONNECT == errorCode
-                            || WebViewClient.ERROR_TIMEOUT == errorCode) {
-                        this.isConnectionError = true;
-                        this.showOfflineOverlay();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        else if (id.equals("onPageFinished")) {
-            if (!this.isConnectionError) {
-                this.hideOfflineOverlay();
-            }
 
+        if (id.equals("onPageFinished")) {
             if (data != null) {
                 String url = data.toString();
                 Log.v(LOG_TAG, String.format("Finished loading URL '%s'", url));
@@ -398,78 +343,6 @@ public class HostedWebApp extends CordovaPlugin {
         return false;
     }
 
-    private WebView createOfflineWebView() {
-        WebView webView = new WebView(activity);
-        webView.getSettings().setJavaScriptEnabled(true);
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-            webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        }
-
-        webView.setLayoutParams(new LinearLayout.LayoutParams(
-                                                 ViewGroup.LayoutParams.MATCH_PARENT,
-                                                 ViewGroup.LayoutParams.MATCH_PARENT,
-                                                 1.0F));
-        return webView;
-    }
-
-    private LinearLayout createOfflineRootLayout() {
-        LinearLayout root = new LinearLayout(activity.getBaseContext());
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setVisibility(View.INVISIBLE);
-        root.setLayoutParams(new LinearLayout.LayoutParams(
-                                              ViewGroup.LayoutParams.MATCH_PARENT,
-                                              ViewGroup.LayoutParams.MATCH_PARENT,
-                                              0.0F));
-        return root;
-    }
-
-    private void handleNetworkConnectionChange(String info) {
-        final HostedWebApp me = HostedWebApp.this;
-        if (info.equals("none")) {
-            this.showOfflineOverlay();
-        } else {
-            if (this.isConnectionError) {
-
-                this.activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String currentUrl = me.webView.getUrl();
-                        me.webView.loadUrlIntoView(currentUrl, false);
-                    }
-                });
-            } else {
-                this.hideOfflineOverlay();
-            }
-        }
-    }
-
-    private void showOfflineOverlay() {
-        final HostedWebApp me = HostedWebApp.this;
-        if (this.offlineOverlayEnabled) {
-            this.activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (me.rootLayout != null) {
-                        me.rootLayout.setVisibility(View.VISIBLE);
-                    }
-                }
-            });
-        }
-    }
-
-    private void hideOfflineOverlay() {
-        final HostedWebApp me = HostedWebApp.this;
-        this.activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (me.rootLayout != null) {
-                    me.rootLayout.setVisibility(View.INVISIBLE);
-                }
-            }
-        });
-    }
-
     private JSONObject loadLocalManifest(String manifestFile) throws JSONException {
         try {
             InputStream inputStream = this.activity.getResources().getAssets().open("www/" + manifestFile);
@@ -486,7 +359,7 @@ public class HostedWebApp extends CordovaPlugin {
         return null;
     }
 
-	private void injectScripts(final List<String> files, final ValueCallback<String> resultCallback) {
+    private void injectScripts(final List<String> files, final ValueCallback<String> resultCallback) {
         final HostedWebApp me = this;
 
         this.cordova.getThreadPool().execute(new Runnable() {
