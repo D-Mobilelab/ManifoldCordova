@@ -162,49 +162,6 @@ public class HostedWebApp extends CordovaPlugin {
         return null;
     }
 
-    @Override
-    public Boolean shouldAllowRequest(String url) {
-        CordovaPlugin whiteListPlugin = this.getWhitelistPlugin();
-
-        if (whiteListPlugin != null && Boolean.TRUE != whiteListPlugin.shouldAllowRequest(url)) {
-            Log.w(LOG_TAG, String.format("Whitelist rejection: url='%s'", url));
-        }
-
-        // do not alter default behavior.
-        return super.shouldAllowRequest(url);
-    }
-
-    @Override
-    public boolean onOverrideUrlLoading(String url) {
-        CordovaPlugin whiteListPlugin = this.getWhitelistPlugin();
-
-        if (whiteListPlugin != null && Boolean.TRUE != whiteListPlugin.shouldAllowNavigation(url)) {
-            // If the URL is not in the list URLs to allow navigation, open the URL in the external browser
-            // (code extracted from CordovaLib/src/org/apache/cordova/CordovaWebViewImpl.java)
-            Log.w(LOG_TAG, String.format("Whitelist rejection: url='%s'", url));
-
-            try {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.addCategory(Intent.CATEGORY_BROWSABLE);
-                Uri uri = Uri.parse(url);
-                // Omitting the MIME type for file: URLs causes "No Activity found to handle Intent".
-                // Adding the MIME type to http: URLs causes them to not be handled by the downloader.
-                if ("file".equals(uri.getScheme())) {
-                    intent.setDataAndType(uri, this.webView.getResourceApi().getMimeType(uri));
-                } else {
-                    intent.setData(uri);
-                }
-                this.activity.startActivity(intent);
-            } catch (android.content.ActivityNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public JSONObject getManifest() {
         return this.manifestObject;
     }
