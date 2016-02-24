@@ -152,13 +152,7 @@ To inject scripts into the hosted web content:
 The following [wiki article](https://github.com/manifoldjs/ManifoldJS/wiki/Using-Cordova-Plugins-in-Hosted-Web-Apps) provides additional information about these features.
 
 ### Offline Feature
-The plugin implements a basic offline feature that will show an offline page whenever network connectivity is lost. By default, the page shows a suitable message alerting the user about the loss of connectivity. To customize the offline experience, a page named **offline.html** can be placed in the **www** folder of the application and it will be used instead.
-
-1. To test the offline feature, interrupt the network connection to show the offline page and reconnect it to hide it. 
-
-	> **Note:** The procedure for setting offline mode varies depending on whether you are testing on an actual device or an emulator. In devices, you can simply set the device to airplane mode. In the case of simulators there is no single method. For example, in [Ripple](http://ripple.incubator.apache.org/), you can simulate a network disconnection by setting the Connection Type to 'none' under Network Status. On the other hand, for the iOS Simulator, you may need to physically disconnect the network cable or turn off the WiFi connection of the host machine.
-
-1. Optionally, replace the default offline UI by adding a new page with the content to be shown while in offline mode. Name the page **offline.html** and place it in the **www** folder of the project.
+This fork doesn't have the offline page, because we check the connection status on our hosted webapp and load a page on the device when the user perform an interaction that need network connection on our hosted webapp, we redirect him to our local page inside the device.
 
 ### Icons and Splash Screens
 The plugin uses any icons specified in the W3C manifest to configure the Cordova application. However, specifying icons in the manifest is not mandatory. If the W3C manifest does not specify any, the application will continue to use the default Cordova icon set or you can enter icon and splash elements manually in the **config.xml** file and they will be used instead. However, be aware that the plugin does replace any such elements if it finds an icon in the manifest that matches its size. Typically, manifest entries reference icons hosted by the target site itself and should reference suitable icons for each platform supported by the application, as described in the [W3C spec](http://www.w3.org/2008/webapps/manifest/#icon-object-and-its-members). The plugin takes care of downloading the corresponding files and copies them to the correct locations in the project.
