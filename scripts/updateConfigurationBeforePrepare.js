@@ -609,12 +609,6 @@ module.exports = function (context) {
           start_url = url.parse(manifest.start_url);
         }
 
-        if (!(start_url && start_url.hostname && start_url.protocol)) { 
-          logger.error('Invalid or incomplete W3C manifest.');
-          var err = new Error('The start_url member in the manifest is required and must be a full URL.');
-          return task.reject(err);
-        }
-
         // update name, start_url, orientation, and fullscreen from manifest
         if (manifest.short_name) {
           config.setName(manifest.short_name.replace(/\//g,'').replace(/\s/g,''));
