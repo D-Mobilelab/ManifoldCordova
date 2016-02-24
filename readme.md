@@ -2,7 +2,12 @@
  license: MIT License
 -->
 
-# Hosted Web Application
+# Offline Hosted Web Application
+
+This is a fork of [ManifodJS Hosted Web App](https://github.com/manifoldjs/ManifoldCordova) that permit to load also a local webapp that works offline.
+
+---
+
 This plugin enables the creation of a hosted web application from a [W3C manifest](http://www.w3.org/2008/webapps/manifest/) that provides metadata associated with a web site. It uses properties in the manifest to update corresponding properties in the Cordova configuration file to enable using content hosted in the site inside a Cordova application.
 
 **Typical manifest** 
