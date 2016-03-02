@@ -23,10 +23,6 @@
 
 -(void) getManifest:(CDVInvokedUrlCommand*)command;
 
--(void) enableOfflinePage:(CDVInvokedUrlCommand*)command;
-
--(void) disableOfflinePage:(CDVInvokedUrlCommand*)command;
-
 -(void) injectPluginScript:(CDVInvokedUrlCommand *)command;
 
 @end
