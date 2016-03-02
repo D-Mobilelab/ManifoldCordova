@@ -4,12 +4,6 @@ var hostedwebapp = {
   },
   getManifest: function (successCallback, errorCallback) {
     cordova.exec(successCallback, errorCallback, "HostedWebApp", "getManifest", []);
-  },
-  enableOfflinePage : function () {
-    cordova.exec(undefined, undefined, "HostedWebApp", "enableOfflinePage", []);
-  },
-  disableOfflinePage : function () {
-    cordova.exec(undefined, undefined, "HostedWebApp", "disableOfflinePage", []);
   }
 }
 
