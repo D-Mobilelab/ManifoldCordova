@@ -25,7 +25,7 @@
 
     <engines>
         <engine name="cordova-windows" version="<=4.1.0" />
-        <engine name="cordova-ios" version="<=3.9.2" />
+        <engine name="cordova-ios" version="<=5.0.0" />
         <engine name="cordova-android" version="<6.0.0" />
     </engines>
 
