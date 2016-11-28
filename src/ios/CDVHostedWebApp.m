@@ -77,8 +77,8 @@ static NSString * const defaultManifestFileName = @"manifest.json";
 
     // set the webview delegate to notify navigation events
     notificationDelegate = [[CVDWebViewNotificationDelegate alloc] init];
-    notificationDelegate.wrappedDelegate = self.webView.delegate;
-    [self.webView setDelegate:notificationDelegate];
+    notificationDelegate.wrappedDelegate = ((UIWebView*)self.webView).delegate;
+    [(UIWebView*)self.webView setDelegate:notificationDelegate];
 }
 
 // loads the specified W3C manifest
@@ -185,7 +185,7 @@ static NSString * const defaultManifestFileName = @"manifest.json";
         }
     }
     
-    return[self.webView stringByEvaluatingJavaScriptFromString:content] != nil;
+    return[(UIWebView*)self.webView stringByEvaluatingJavaScriptFromString:content] != nil;
 }
 
 - (BOOL) isCordovaEnabled
@@ -268,7 +268,7 @@ static NSString * const defaultManifestFileName = @"manifest.json";
         if (match != nil)
         {
             CDVWhitelist *whitelist = [[CDVWhitelist alloc] initWithArray:match];
-            NSURL* url = self.webView.request.URL;
+            NSURL* url = ((UIWebView*)self.webView).request.URL;
             isURLMatch = [whitelist URLIsAllowed:url];
         }
     }
@@ -318,7 +318,7 @@ static NSString * const defaultManifestFileName = @"manifest.json";
             }
             
             NSString* javascript = [NSString stringWithFormat:@"window.hostedWebApp = { 'platform': '%@', 'pluginMode': '%@', 'cordovaBaseUrl': '%@'};", IOS_PLATFORM, pluginMode, cordovaBaseUrl];
-            [self.webView stringByEvaluatingJavaScriptFromString:javascript];
+            [(UIWebView*)self.webView stringByEvaluatingJavaScriptFromString:javascript];
             
             NSMutableArray* scripts = [[NSMutableArray alloc] init];
             if ([pluginMode isEqualToString:@"client"])
